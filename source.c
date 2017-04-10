@@ -46,8 +46,16 @@ typedef struct celula
     
     Exercitiul 9 (BONUS)
     Sa se ordoneze o lista de intregi
-    
+
     Exercitiul 10:
+    Sa se realizeze reuniunea a 2 liste ordonate crescator, fara elemente 
+    duplicat.
+    
+    Exercitiul 11:
+    Sa se determine indicele de inceput si sfarsit pt prima secventa de
+    lungime minim 3 cu elemente pare (vezi ex. lab 2).
+    
+    Exercitiul 12:
     Sa se distruga lista (eliberare de memorie)
     
     Nota: Se va testa cu valgrind pentru a verifica daca nu exista erori sau
@@ -97,9 +105,9 @@ int InsInc(TLista *l, TEL e)
     return 1;
 }
 // b)
-int InsSf(TLista *L, TEL el)
+int InsSf(ALista L, TEL el)
 {
-    TLista aux, ultim;
+    TLista aux, ultim = NULL;
     
     // pozitionare la final
     for (; *L != NULL; ultim = *L, L = &(*L)->urm);
@@ -384,6 +392,149 @@ void Ordonare(TLista *l)
 }
 
 /* Exercitiul 10 */
+TLista Reuniune(TLista a, TLista b, int *count)
+{
+    TLista c = NULL, aux, ultim = NULL;
+    *count = 0;
+    while(a != NULL && b != NULL)
+    {
+        if (a->info < b->info)
+        {
+            aux = AlocCelula(a->info);
+            if(!aux)
+                return c;
+            
+            if(!ultim)
+            {
+                c = aux;
+                ultim = aux;
+            }
+            else
+            {
+                ultim->urm = aux;
+                ultim = aux;
+            }
+            a = a->urm;
+        }
+        else if  (a->info > b->info)
+        {
+            aux = AlocCelula(b->info);
+            if(!aux)
+                return c;
+            
+            if(!ultim)
+            {
+                c = aux;
+                ultim = aux;
+            }
+            else
+            {
+                ultim->urm = aux;
+                ultim = aux;
+            }
+            b = b->urm;
+        }
+        else
+        {
+            aux = AlocCelula(a->info);
+            if(!aux)
+                return c;
+            
+            if(!ultim)
+            {
+                c = aux;
+                ultim = aux;
+            }
+            else
+            {
+                ultim->urm = aux;
+                ultim = aux;
+            }
+            a = a->urm;
+            b = b->urm;
+        }
+        (*count)++;
+    }
+    
+    while(a)
+    {
+        aux = AlocCelula(a->info);
+        
+        if(!aux)
+            return c;
+        
+        if(!ultim)
+        {
+            c = aux;
+            ultim = aux;
+        }
+        else
+        {
+            ultim->urm = aux;
+            ultim = aux;
+        }
+        (*count)++;
+        a = a->urm;
+    }
+    
+    while(b)
+    {
+         aux = AlocCelula(b->info);
+        
+        if(!aux)
+            return c;
+        
+        if(!ultim)
+        {
+            c = aux;
+            ultim = aux;
+        }
+        else
+        {
+            ultim->urm = aux;
+            ultim = aux;
+        }
+        (*count)++;
+        b = b->urm;
+    }
+    
+    return c;
+}
+
+/* Exercitiul 11 */
+int findSeq(TLista T, int *iBegin, int *iEnd)
+{
+    int i = 0;
+    *iBegin = *iEnd = 0;
+    for (; T != NULL; T = T->urm)
+    {
+        if (T->info % 2 == 0)
+            (*iEnd)++;
+        else 
+        {
+            (*iBegin)++;
+            if (*iEnd >= 3)
+                break;
+            else 
+            {    
+                (*iBegin) += *iEnd;
+                *iEnd = 0;
+            }
+        }
+    }
+    if (*iEnd == 0)
+        *iEnd = *iBegin = -1;
+    else 
+    {
+        i = *iEnd;
+        (*iBegin)--;  // start iteration from 0;
+        *iEnd += *iBegin - 1; // don't count an element twice
+    }
+    
+    return i;
+}
+
+/* Exercitiul 12 */
 void DistrLista(TLista *l)
 {
     if (!l)
@@ -403,12 +554,13 @@ void DistrLista(TLista *l)
 int main()
 {
     int ex, x, ref;
+    int r, b, e;
     TLista l1 = NULL, l2 = NULL;
     char ch;
     
     do {
         printf("Pentru a iesi alege 0 ca exercitiu.\n");
-        printf("Alege exercitiul (1-9): ");
+        printf("Alege exercitiul (1-11): ");
         scanf("%d", &ex);
         
         switch (ex)
@@ -441,8 +593,8 @@ int main()
                         {
                             printf("Introducere elemente: ");
                             while (scanf("%d", &x))
-                            if (InsOrd(&l1, x, cmpInt) == 0)
-                                printf("Inserare esuata!\n");
+                                if (InsOrd(&l1, x, cmpInt) == 0)
+                                    printf("Inserare esuata!\n");
                             while((ch = getchar()) && (ch == '\n' || ch == EOF));
                         }
                         else printf("Lista nevida!!\n");
@@ -544,6 +696,27 @@ int main()
             case 9:
                 Ordonare(&l1);
                 break;
+                
+            case 10:
+                printf("Introducere elemente pentru Lista 2: ");
+                while (scanf("%d", &x))
+                    if (InsOrd(&l2, x, cmpInt) == 0)
+                        printf("Inserare esuata!\n");
+                while((ch = getchar()) && (ch == '\n' || ch == EOF));
+                int count;
+                TLista l3 = Reuniune(l1, l2, &count);
+                printf("Cardinalul multimii noi este %d.\n", count);
+                AfisareLista(l3);
+                DistrLista(&l2);
+                DistrLista(&l3);
+                break;
+                
+            case 11:
+                r = findSeq(l1, &b, &e);
+                printf("Sequence length is %d; Begin: %d; End: %d.\n", 
+                    r, b, e);
+                break;
+                
             default: printf("Alegere invalida!\n");
         }
         printf("\n\n");
